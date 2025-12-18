@@ -382,46 +382,8 @@ function CountUp({ value, suffix = '', prefix = '', durationMs = 950 }: { value:
 }
 
 function FloatingOrbs() {
-  const reduce = useReducedMotion();
-  const orbs = useMemo(
-    () =>
-      Array.from({ length: 10 }).map((_, i) => {
-        const left = (i * 17 + 7) % 100;
-        const top = (i * 23 + 9) % 100;
-        const size = 180 + (i % 4) * 120;
-        const hue = [265, 325, 195, 145][i % 4];
-        return { i, left, top, size, hue };
-      }),
-    [],
-  );
-
-  return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden">
-      {orbs.map((o) => (
-        <motion.div
-          key={o.i}
-          className="absolute rounded-full blur-3xl opacity-40"
-          style={{
-            left: `${o.left}%`,
-            top: `${o.top}%`,
-            width: o.size,
-            height: o.size,
-            background: `radial-gradient(circle at 30% 30%, hsla(${o.hue}, 95%, 65%, 0.55), transparent 60%)`,
-          }}
-          animate={
-            reduce
-              ? undefined
-              : {
-                  x: [0, (o.i % 2 ? 18 : -18), 0],
-                  y: [0, (o.i % 3 ? -22 : 22), 0],
-                  scale: [1, 1.06, 1],
-                }
-          }
-          transition={{ duration: 10 + o.i, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      ))}
-    </div>
-  );
+  // Removed floating orbs for flat background design
+  return null;
 }
 
 function SparkleBurst({ seed }: { seed: string }) {
@@ -475,21 +437,25 @@ function GlassCard({
   className,
   gradient,
   glow,
+  brutal,
 }: {
   children: React.ReactNode;
   className?: string;
   gradient: string;
   glow: string;
+  brutal?: boolean;
 }) {
   return (
     <div
       className={cx(
-        'relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] backdrop-blur-xl',
+        'relative overflow-hidden rounded-3xl cartoon-border-thick p-6 snw-card',
         className,
       )}
+      style={{
+        borderColor: brutal ? '#00ffe0' : '#1bb388',
+        backgroundColor: brutal ? '#00101a' : '#252b3d',
+      }}
     >
-      <div className={cx('pointer-events-none absolute -inset-24 opacity-60 blur-3xl', gradient)} />
-      <div className={cx('pointer-events-none absolute inset-0 opacity-70', glow)} />
       <div className="relative">{children}</div>
     </div>
   );
@@ -500,6 +466,7 @@ function NeonButton({
   onClick,
   disabled,
   kind = 'primary',
+  brutal,
   className,
   ariaLabel,
 }: {
@@ -507,43 +474,60 @@ function NeonButton({
   onClick?: () => void;
   disabled?: boolean;
   kind?: 'primary' | 'ghost' | 'danger';
+  brutal?: boolean;
   className?: string;
   ariaLabel?: string;
 }) {
   const base =
-    'inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition will-change-transform focus:outline-none focus:ring-2 focus:ring-white/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50';
+    'inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-black transition will-change-transform focus:outline-none active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50 cartoon-border';
 
   const styles =
     kind === 'ghost'
-      ? 'border border-white/10 bg-white/5 hover:bg-white/10'
+      ? cx(
+          brutal ? 'snw-neon-button-ghost' : '',
+          'bg-white/10 hover:bg-white/20 text-white',
+        )
       : kind === 'danger'
-        ? 'bg-gradient-to-r from-rose-500/90 to-orange-500/90 shadow-[0_0_30px_rgba(244,63,94,0.35)] hover:brightness-110'
-        : 'bg-gradient-to-r from-violet-500/90 via-fuchsia-500/90 to-cyan-400/90 shadow-[0_0_30px_rgba(139,92,246,0.35)] hover:brightness-110';
+        ? 'bg-[#ff4757] text-white hover:bg-[#ff6b7a]'
+        : cx(
+            brutal ? 'snw-neon-button-primary' : '',
+            'bg-[#1bb388] text-white hover:bg-[#1dd9a0]',
+          );
 
   return (
-    <button aria-label={ariaLabel} disabled={disabled} onClick={onClick} className={cx(base, styles, className)}>
+    <button
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={onClick}
+      className={cx(base, styles, className)}
+      style={{ borderColor: '#000' }}
+    >
       {children}
     </button>
   );
 }
 
-function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <span className={cx('rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80', className)}>{children}</span>;
+function Pill({ children, className, style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
+  return (
+    <span
+      className={cx('rounded-full px-3 py-1 text-xs font-bold cartoon-border snw-chip', className)}
+      style={{ borderColor: '#000', backgroundColor: 'rgba(27, 179, 136, 0.2)', color: '#fff', ...style }}
+    >
+      {children}
+    </span>
+  );
 }
 
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6">
-      <div className="h-6 w-44 rounded-lg bg-white/10" />
-      <div className="mt-6 h-16 w-2/3 rounded-2xl bg-white/10" />
-      <div className="mt-3 h-4 w-1/2 rounded-lg bg-white/10" />
+    <div className="relative overflow-hidden rounded-3xl cartoon-border-thick p-6 snw-card" style={{ borderColor: '#1bb388', backgroundColor: '#252b3d' }}>
+      <div className="h-6 w-44 rounded-lg bg-white/15" />
+      <div className="mt-6 h-16 w-2/3 rounded-2xl bg-white/15" />
+      <div className="mt-3 h-4 w-1/2 rounded-lg bg-white/15" />
       <div className="mt-10 grid grid-cols-3 gap-3">
-        <div className="h-10 rounded-2xl bg-white/10" />
-        <div className="h-10 rounded-2xl bg-white/10" />
-        <div className="h-10 rounded-2xl bg-white/10" />
-      </div>
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-x-24 top-0 h-full -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer" />
+        <div className="h-10 rounded-2xl bg-white/15" />
+        <div className="h-10 rounded-2xl bg-white/15" />
+        <div className="h-10 rounded-2xl bg-white/15" />
       </div>
     </div>
   );
@@ -555,9 +539,9 @@ const ACTS: ActMeta[] = [
     emoji: '🚀',
     title: 'YOUR JOURNEY',
     subtitle: 'Main character arc',
-    gradient: 'bg-gradient-to-br from-violet-500/40 via-indigo-500/10 to-cyan-400/30',
-    glow: 'shadow-[0_0_45px_rgba(6,182,212,0.20)]',
-    accent: 'from-cyan-400 to-violet-500',
+    gradient: 'bg-gradient-to-br from-[#1bb388]/40 via-cyan-400/15 to-violet-500/30',
+    glow: 'shadow-[0_0_45px_rgba(27,179,136,0.25)]',
+    accent: 'from-[#1bb388] to-violet-500',
     preview: (d) => `${formatCompact(d.act1.totalTransactions)} txs • ${d.act1.mostActiveMonth} peak`,
     status: 'live',
   },
@@ -566,9 +550,9 @@ const ACTS: ActMeta[] = [
     emoji: '🌊',
     title: 'LIQUID STAKING',
     subtitle: 'Staked. Liquid. Drippy.',
-    gradient: 'bg-gradient-to-br from-cyan-400/40 via-sky-500/15 to-blue-600/35',
-    glow: 'shadow-[0_0_45px_rgba(6,182,212,0.26)]',
-    accent: 'from-cyan-400 to-blue-600',
+    gradient: 'bg-gradient-to-br from-[#1bb388]/45 via-cyan-400/20 to-blue-500/35',
+    glow: 'shadow-[0_0_45px_rgba(27,179,136,0.28)]',
+    accent: 'from-[#1bb388] to-cyan-400',
     preview: (d) => `${formatCompact(d.act2.liquidStaking.xSTRKHoldings)} xSTRK • ${d.act2.liquidStaking.season1Rank}`,
     status: 'live',
   },
@@ -588,9 +572,9 @@ const ACTS: ActMeta[] = [
     emoji: '🎮',
     title: 'DEGEN MOMENTS',
     subtitle: 'Soon™',
-    gradient: 'bg-gradient-to-br from-fuchsia-500/35 via-pink-500/10 to-violet-500/30',
-    glow: 'shadow-[0_0_45px_rgba(236,72,153,0.20)]',
-    accent: 'from-fuchsia-500 to-violet-500',
+    gradient: 'bg-gradient-to-br from-[#1bb388]/35 via-fuchsia-500/15 to-violet-500/30',
+    glow: 'shadow-[0_0_45px_rgba(27,179,136,0.22)]',
+    accent: 'from-[#1bb388] to-fuchsia-500',
     preview: () => 'Future Act • LFG',
     status: 'future',
   },
@@ -599,9 +583,9 @@ const ACTS: ActMeta[] = [
     emoji: '🌍',
     title: 'NETWORK IMPACT',
     subtitle: 'Soon™',
-    gradient: 'bg-gradient-to-br from-emerald-400/35 via-cyan-400/10 to-teal-500/30',
-    glow: 'shadow-[0_0_45px_rgba(16,185,129,0.20)]',
-    accent: 'from-emerald-400 to-cyan-400',
+    gradient: 'bg-gradient-to-br from-[#1bb388]/40 via-emerald-400/20 to-cyan-500/35',
+    glow: 'shadow-[0_0_45px_rgba(27,179,136,0.26)]',
+    accent: 'from-[#1bb388] to-emerald-400',
     preview: () => 'Future Act • WAGMI',
     status: 'future',
   },
@@ -610,17 +594,17 @@ const ACTS: ActMeta[] = [
     emoji: '🔮',
     title: '2025 PREDICTIONS',
     subtitle: 'Soon™',
-    gradient: 'bg-gradient-to-br from-violet-500/35 via-fuchsia-500/10 to-pink-500/30',
-    glow: 'shadow-[0_0_45px_rgba(139,92,246,0.20)]',
-    accent: 'from-violet-500 to-pink-500',
+    gradient: 'bg-gradient-to-br from-violet-500/35 via-[#1bb388]/20 to-fuchsia-500/30',
+    glow: 'shadow-[0_0_45px_rgba(27,179,136,0.24)]',
+    accent: 'from-[#1bb388] to-violet-500',
     preview: () => 'Future Act • You’re early',
     status: 'future',
   },
 ];
 
 function buildAct1Cards(): CardDef[] {
-  const grad = 'bg-gradient-to-br from-violet-500/45 via-indigo-500/10 to-cyan-400/35';
-  const glow = 'shadow-[0_0_55px_rgba(139,92,246,0.22)]';
+  const grad = 'bg-gradient-to-br from-[#1bb388]/45 via-cyan-400/15 to-violet-500/35';
+  const glow = 'shadow-[0_0_55px_rgba(27,179,136,0.25)]';
 
   const base: Omit<CardDef, 'id' | 'render' | 'shareText'> & { render: CardDef['render']; shareText: CardDef['shareText'] } = {
     kind: 'stat',
@@ -642,24 +626,24 @@ function buildAct1Cards(): CardDef[] {
       render: (d) => (
         <div>
           <div className="flex items-center justify-between">
-            <Pill className="border-violet-400/30 bg-violet-500/10">GM ANON 🫡</Pill>
-            <Pill className="border-cyan-400/30 bg-cyan-400/10">{shortAddr(d.address)}</Pill>
+            <Pill style={{ borderColor: '#000', backgroundColor: '#1bb388', color: '#fff' }}>GM ANON 🫡</Pill>
+            <Pill style={{ borderColor: '#000', backgroundColor: 'rgba(6, 182, 212, 0.3)', color: '#fff' }}>{shortAddr(d.address)}</Pill>
           </div>
           <div className="mt-8">
             <div className="text-4xl font-black tracking-tight">
-              <span className="bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{d.act1.accountAge}</span>{' '}
-              <span className="text-white/90">days on Starknet</span>
+              <span className="text-[#1bb388] cartoon-text">{d.act1.accountAge}</span>{' '}
+              <span className="text-white font-bold">days on Starknet</span>
             </div>
             <div className="mt-3 text-white/75">First tx: {d.act1.firstTxDate} • You’ve been cooking ever since.</div>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Transactions</div>
               <div className="mt-1 text-xl font-bold">
                 <CountUp value={d.act1.totalTransactions} />
               </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Peak month</div>
               <div className="mt-1 text-xl font-bold">{d.act1.mostActiveMonth}</div>
             </div>
@@ -678,18 +662,18 @@ function buildAct1Cards(): CardDef[] {
         <div className="grid gap-6">
           <div>
             <div className="text-6xl font-black tracking-tight">
-              <span className="bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#1bb388] to-violet-300 bg-clip-text text-transparent">
                 <CountUp value={d.act1.totalTransactions} />
               </span>
             </div>
             <div className="mt-2 text-white/75">Total transactions sent in 2024.</div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Most active month</div>
               <div className="mt-1 text-xl font-bold">{d.act1.mostActiveMonth}</div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Value moved</div>
               <div className="mt-1 text-xl font-bold">{formatUSD(d.act1.totalValueTransacted)}</div>
             </div>
@@ -707,7 +691,7 @@ function buildAct1Cards(): CardDef[] {
       render: (d) => (
         <div>
           <div className="text-6xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-cyan-300 to-fuchsia-300 bg-clip-text text-transparent">{formatUSD(d.act1.gasSavedUSD)}</span>
+            <span className="bg-gradient-to-r from-[#1bb388] to-cyan-300 bg-clip-text text-transparent">{formatUSD(d.act1.gasSavedUSD)}</span>
           </div>
           <div className="mt-2 text-white/75">Estimated gas saved vs. doing this on L1.</div>
           <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -717,7 +701,7 @@ function buildAct1Cards(): CardDef[] {
             </div>
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400"
+                className="h-full rounded-full bg-gradient-to-r from-[#1bb388] via-cyan-400 to-violet-400"
                 style={{ width: `${clamp((d.act1.gasSavedUSD / 2200) * 100, 10, 100)}%` }}
               />
             </div>
@@ -736,17 +720,17 @@ function buildAct1Cards(): CardDef[] {
       render: (d) => (
         <div>
           <div className="text-6xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#1bb388] to-violet-300 bg-clip-text text-transparent">
               <CountUp value={d.act1.uniqueContracts} />
             </span>
           </div>
           <div className="mt-2 text-white/75">Unique contracts you interacted with.</div>
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Vibe check</div>
               <div className="mt-1 text-sm font-semibold">Curious degen ✅</div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Diagnosis</div>
               <div className="mt-1 text-sm font-semibold">Onchain, terminally</div>
             </div>
@@ -780,8 +764,8 @@ function buildAct1Cards(): CardDef[] {
 }
 
 function buildAct2Cards(): CardDef[] {
-  const grad = 'bg-gradient-to-br from-cyan-400/45 via-sky-500/12 to-blue-700/40';
-  const glow = 'shadow-[0_0_55px_rgba(6,182,212,0.26)]';
+  const grad = 'bg-gradient-to-br from-[#1bb388]/45 via-cyan-400/18 to-blue-600/40';
+  const glow = 'shadow-[0_0_55px_rgba(27,179,136,0.28)]';
 
   return [
     {
@@ -795,12 +779,12 @@ function buildAct2Cards(): CardDef[] {
       render: (d) => (
         <div>
           <div className="flex items-center justify-between">
-            <Pill className="border-cyan-400/30 bg-cyan-400/10">Season 1</Pill>
+            <Pill className="border-[#1bb388]/30 bg-[#1bb388]/10">Season 1</Pill>
             <Pill className="border-blue-400/30 bg-blue-500/10">{d.act2.liquidStaking.season1Rank}</Pill>
           </div>
           <div className="mt-8">
             <div className="text-5xl font-black tracking-tight">
-              <span className="bg-gradient-to-r from-cyan-200 via-sky-200 to-blue-200 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#1bb388] via-cyan-200 to-sky-200 bg-clip-text text-transparent">
                 {formatCompact(d.act2.liquidStaking.xSTRKHoldings)}
               </span>{' '}
               <span className="text-white/90">xSTRK</span>
@@ -829,19 +813,19 @@ function buildAct2Cards(): CardDef[] {
       render: (d) => (
         <div>
           <div className="text-6xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-cyan-200 to-blue-200 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#1bb388] to-cyan-200 bg-clip-text text-transparent">
               <CountUp value={d.act2.liquidStaking.season1Points} />
             </span>
           </div>
           <div className="mt-2 text-white/75">Season 1 points. Rank: {d.act2.liquidStaking.season1Rank}</div>
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Staking days</div>
               <div className="mt-1 text-xl font-bold">
                 <CountUp value={d.act2.liquidStaking.stakingDays} />
               </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Protocols used</div>
               <div className="mt-1 text-xl font-bold">{d.act2.liquidStaking.protocolsUsed.length}</div>
             </div>
@@ -866,12 +850,12 @@ function buildAct2Cards(): CardDef[] {
           <div>
             <div className="text-white/75">You vs Network average</div>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
+              <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: 'rgba(27, 179, 136, 0.25)' }}>
                 <div className="text-xs text-white/70">You</div>
                 <div className="mt-1 text-3xl font-black">{youApr}%</div>
                 <div className="mt-1 text-xs text-white/70">LP positions: {d.act2.liquidStaking.lpPositions}</div>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
                 <div className="text-xs text-white/60">Network avg</div>
                 <div className="mt-1 text-3xl font-black text-white/80">{netApr}%</div>
                 <div className="mt-1 text-xs text-white/60">(approx)</div>
@@ -884,7 +868,7 @@ function buildAct2Cards(): CardDef[] {
               </div>
               <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500"
+                  className="h-full rounded-full bg-gradient-to-r from-[#1bb388] via-cyan-400 to-sky-400"
                   style={{ width: `${clamp(50 + pct / 2, 8, 100)}%` }}
                 />
               </div>
@@ -928,12 +912,12 @@ function buildAct2Cards(): CardDef[] {
       render: (d) => (
         <div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Total staked</div>
               <div className="mt-1 text-xl font-bold">{formatCompact(d.act2.nativeStaking.totalStakedSTRK)} STRK</div>
               <div className="mt-1 text-xs text-white/60">+ {d.act2.nativeStaking.totalStakedBTC} BTC</div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl cartoon-border p-4" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
               <div className="text-xs text-white/60">Native APR</div>
               <div className="mt-1 text-xl font-bold">{d.act2.nativeStaking.nativeAPR}%</div>
               <div className="mt-1 text-xs text-white/60">Rewards: {formatUSD(d.act2.nativeStaking.rewardsEarnedUSD)}</div>
@@ -944,7 +928,7 @@ function buildAct2Cards(): CardDef[] {
             <div className="text-xs text-white/60">Validators you backed</div>
             <div className="mt-3 grid gap-2">
               {d.act2.nativeStaking.validators.slice(0, 4).map((v) => (
-                <div key={v.name} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/10 px-3 py-2">
+                <div key={v.name} className="flex items-center justify-between rounded-xl cartoon-border px-3 py-2" style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{v.icon ?? '🛡️'}</span>
                     <span className="text-sm font-semibold">{v.name}</span>
@@ -980,7 +964,7 @@ function BadgeCardView({ badge }: { badge: Badge }) {
           </span>
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+        <div className="mt-6 rounded-2xl cartoon-border p-4 text-center" style={{ borderColor: '#1bb388', backgroundColor: '#252b3d' }}>
           <div className="flex items-center justify-center gap-2 text-sm font-semibold text-white/80">
             <Lock className="h-4 w-4" /> Locked
           </div>
@@ -1018,7 +1002,7 @@ function ShareModal({
           aria-modal="true"
           aria-label="Share"
         >
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+          <div className="absolute inset-0 bg-black/80" onClick={onClose} />
           <motion.div
             className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-[#0b1226]/90 p-6 shadow-[0_0_60px_rgba(139,92,246,0.25)]"
             initial={{ y: 16, scale: 0.98, opacity: 0 }}
@@ -1033,7 +1017,8 @@ function ShareModal({
               </div>
               <button
                 onClick={onClose}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10"
+                className="rounded-xl cartoon-border px-3 py-2 text-xs font-black text-white hover:bg-[#1bb388] transition"
+                style={{ borderColor: '#1bb388', backgroundColor: '#1a1f2e' }}
               >
                 Close
               </button>
@@ -1048,7 +1033,7 @@ function ShareModal({
               </NeonButton>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/70">
+            <div className="mt-4 rounded-2xl cartoon-border p-4 text-xs font-bold text-white/90" style={{ borderColor: '#1bb388', backgroundColor: '#252b3d' }}>
               Ready to flex on X 🐦 — paste your image + text.
               <div className="mt-2 text-white/55">Tip: screenshots are always acceptable. 😤</div>
             </div>
@@ -1061,6 +1046,7 @@ function ShareModal({
 
 export default function StarknetWrapped() {
   const reduce = useReducedMotion();
+  const [brutal, setBrutal] = useLocalStorageState<boolean>('snw:turquoise-brutalism:v1', false);
   const [screen, setScreen] = useState<'landing' | 'loading' | 'dashboard' | 'viewer'>('landing');
   const [address, setAddress] = useState('');
   const [data, setData] = useState<UserWrappedData | null>(null);
@@ -1258,47 +1244,80 @@ export default function StarknetWrapped() {
   };
 
   return (
-    <div className="relative">
-      <Toaster position="top-center" toastOptions={{
-        style: { background: 'rgba(15,23,42,0.92)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' },
-      }} />
-      <FloatingOrbs />
+    <div className={cx('relative', brutal && 'snw-brutal-turquoise')}>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: brutal ? '#001824' : '#0B1226',
+            color: 'white',
+            border: '3px solid #000',
+            boxShadow: brutal ? '0 0 24px rgba(0,245,255,0.8)' : undefined,
+          },
+        }}
+      />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10">
-        <AnimatePresence mode="wait">
-          {screen === 'landing' ? (
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-white/70 snw-muted-text">
+            <span className="rounded-full bg-black/40 px-3 py-1 cartoon-border snw-chip">YEAR ON STARKNET</span>
+            <span>Built by Endur</span>
+          </div>
+          <NeonButton
+            brutal={brutal}
+            kind={brutal ? 'primary' : 'ghost'}
+            onClick={() => setBrutal(!brutal)}
+            ariaLabel="Toggle Turquoise brutalism mode"
+            className="snw-accent-pill-soft"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span className="hidden sm:inline">Turquoise brutalism</span>
+            <span className="sm:hidden">Brutal mode</span>
+          </NeonButton>
+        </div>
+
+        <div className="flex flex-1 items-center justify-center">
+          <AnimatePresence mode="wait">
+            {screen === 'landing' ? (
             <motion.div
               key="landing"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
-              className="w-full max-w-xl"
+              className="w-full max-w-xl snw-panel"
             >
               <div className="relative">
-                <div className="pointer-events-none absolute -inset-[1px] rounded-[28px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400 opacity-80 blur" />
-                <div className="pointer-events-none absolute -inset-[2px] rounded-[30px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400 opacity-40" />
-                <div className="relative rounded-[26px] border border-white/10 bg-[#0b1226]/80 p-8 shadow-[0_0_70px_rgba(139,92,246,0.22)] backdrop-blur-xl">
+                <div
+                  className="relative rounded-[26px] cartoon-border-thick p-8 snw-card"
+                  style={{ borderColor: '#1bb388', backgroundColor: '#252b3d' }}
+                >
                   <div className="flex items-center justify-between">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
-                      <Sparkles className="h-4 w-4 text-amber-200" />
-                      Powered by <span className="font-semibold text-white/85">Endur</span>
+                    <div
+                      className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold text-white cartoon-border snw-accent-pill-soft"
+                      style={{ borderColor: '#1bb388', backgroundColor: 'rgba(27, 179, 136, 0.15)' }}
+                    >
+                      <Sparkles className="h-4 w-4 text-[#1bb388]" />
+                      Powered by <span className="font-black text-[#1bb388]">Endur</span>
                     </div>
-                    <div className="text-xs text-white/60">Dark mode only • obviously</div>
+                    <div className="text-xs text-white/80 font-semibold">Dark mode only • obviously</div>
                   </div>
 
                   <div className="mt-8">
-                    <div className="text-4xl font-black tracking-tight">
-                      <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-200 bg-clip-text text-transparent">YOUR YEAR ON STARKNET</span>
+                    <div className="text-4xl font-black tracking-tight cartoon-text">
+                      <span className="text-[#1bb388]">YOUR YEAR ON STARKNET</span>
                       <span className="ml-2">🚀</span>
                     </div>
-                    <div className="mt-2 text-lg font-extrabold tracking-widest text-white/80">2024 WRAPPED</div>
-                    <div className="mt-3 text-sm text-white/65">Paste your address. We’ll turn it into pure dopamine.</div>
+                    <div className="mt-2 text-lg font-black tracking-widest text-white cartoon-text snw-muted-text">2024 WRAPPED</div>
+                    <div className="mt-3 text-sm text-white/65 snw-muted-text">Paste your address. We’ll turn it into pure dopamine.</div>
                   </div>
 
-                  <div className="mt-8 grid gap-3">
-                    <label className="text-xs font-semibold text-white/70">Starknet address</label>
-                    <div className={cx('rounded-2xl border bg-white/5 px-4 py-3', error ? 'border-rose-400/40' : 'border-white/10')}>
+                  <div className="mt-8 grid gap-4">
+                    <label className="text-sm font-bold text-[#1bb388] snw-accent-text">Starknet address</label>
+                    <div
+                      className={cx('rounded-2xl px-4 py-3 cartoon-border snw-input', error ? '' : '')}
+                      style={{ borderColor: error ? '#ff4757' : '#1bb388', backgroundColor: '#1a1f2e' }}
+                    >
                       <input
                         value={address}
                         onChange={(e) => {
@@ -1306,22 +1325,22 @@ export default function StarknetWrapped() {
                           setError(null);
                         }}
                         placeholder="0x..."
-                        className="w-full bg-transparent text-sm text-white/90 outline-none placeholder:text-white/35"
+                        className="w-full bg-transparent text-base font-bold text-white outline-none placeholder:text-white/60"
                         aria-label="Starknet address"
                         inputMode="text"
                         autoComplete="off"
                         spellCheck={false}
                       />
                     </div>
-                    {error ? <div className="text-xs text-rose-200">{error}</div> : <div className="text-xs text-white/50">Validation: starts with 0x, hex only.</div>}
+                    {error ? <div className="text-sm font-semibold text-rose-400">{error}</div> : <div className="text-xs font-medium text-white/70 snw-muted-text">Validation: starts with 0x, hex only.</div>}
 
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.99 }}>
-                      <NeonButton onClick={onSubmit} className="w-full py-4 text-base" ariaLabel="Lets go">
+                      <NeonButton brutal={brutal} onClick={onSubmit} className="w-full py-4 text-base" ariaLabel="Lets go">
                         <Zap className="h-5 w-5" /> LET&apos;S GO 🎮
                       </NeonButton>
                     </motion.div>
 
-                    <div className="mt-2 text-center text-xs text-white/45">
+                    <div className="mt-3 text-center text-xs font-medium text-white/70 snw-muted-text">
                       Pro tip: double-tap cards to favorite. Share your best flex.
                     </div>
                   </div>
@@ -1330,18 +1349,18 @@ export default function StarknetWrapped() {
             </motion.div>
           ) : null}
 
-          {screen === 'loading' ? (
+            {screen === 'loading' ? (
             <motion.div
               key="loading"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
-              className="w-full max-w-3xl"
+              className="w-full max-w-3xl snw-panel"
             >
               <div className="mb-6 flex items-center justify-between">
-                <div className="text-sm text-white/70">Fetching onchain vibes…</div>
-                <Pill className="border-cyan-400/25 bg-cyan-400/10">Loading</Pill>
+                <div className="text-base font-bold text-white">Fetching onchain vibes…</div>
+                <Pill style={{ borderColor: '#1bb388', backgroundColor: '#1bb388', color: '#fff' }}>Loading</Pill>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <SkeletonCard />
@@ -1353,7 +1372,7 @@ export default function StarknetWrapped() {
             </motion.div>
           ) : null}
 
-          {screen === 'dashboard' && data ? (
+            {screen === 'dashboard' && data ? (
             <motion.div
               key="dashboard"
               initial={{ opacity: 0, y: 12 }}
@@ -1364,13 +1383,14 @@ export default function StarknetWrapped() {
             >
               <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <div className="text-3xl font-black tracking-tight">
-                    <span className="bg-gradient-to-r from-cyan-200 via-violet-200 to-fuchsia-200 bg-clip-text text-transparent">Welcome back, legend.</span>
+                  <div className="text-4xl font-black tracking-tight cartoon-text">
+                    <span className="text-white">Welcome back, </span>
+                    <span className="text-[#1bb388]">legend.</span>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-white/70">
-                    <Pill className="border-white/10 bg-white/5">{shortAddr(data.address)}</Pill>
-                    <Pill className="border-amber-400/25 bg-amber-400/10">{actsExplored}/6 Acts explored</Pill>
-                    {unlockedActs[2] ? <Pill className="border-emerald-400/25 bg-emerald-400/10">Act 2 unlocked ✅</Pill> : <Pill className="border-white/10 bg-white/5">Unlock Act 2 by finishing Act 1</Pill>}
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold">
+                    <Pill style={{ borderColor: '#1bb388', backgroundColor: 'rgba(27, 179, 136, 0.15)', color: '#fff' }}>{shortAddr(data.address)}</Pill>
+                    <Pill style={{ borderColor: '#1bb388', backgroundColor: '#1bb388', color: '#fff' }}>{actsExplored}/6 Acts explored</Pill>
+                    {unlockedActs[2] ? <Pill style={{ borderColor: '#1bb388', backgroundColor: '#1bb388', color: '#fff' }}>Act 2 unlocked ✅</Pill> : <Pill style={{ borderColor: '#1bb388', backgroundColor: 'rgba(27, 179, 136, 0.15)', color: '#fff' }}>Unlock Act 2 by finishing Act 1</Pill>}
                   </div>
                 </div>
 
@@ -1410,37 +1430,42 @@ export default function StarknetWrapped() {
                         goToViewer(a.id);
                       }}
                       className={cx(
-                        'group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur-xl transition will-change-transform focus:outline-none focus:ring-2 focus:ring-white/20',
-                        'hover:scale-[1.01] hover:bg-white/7 active:scale-[0.99]',
+                        'group relative overflow-hidden rounded-3xl cartoon-border-thick p-6 text-left transition will-change-transform focus:outline-none',
+                        'hover:scale-[1.02] active:scale-[0.98]',
                       )}
                       aria-label={`Act ${a.id} ${a.title}`}
                     >
-                      <div className={cx('pointer-events-none absolute -inset-24 opacity-80 blur-3xl', a.gradient)} />
                       <div className="relative">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <div className="text-xs font-extrabold tracking-widest text-white/60">ACT {a.id}</div>
-                            <div className="mt-2 text-xl font-black tracking-tight">{a.title}</div>
-                            <div className="mt-1 text-sm text-white/70">{a.subtitle}</div>
+                            <div className="text-xs font-black tracking-widest text-[#1bb388] cartoon-text">ACT {a.id}</div>
+                            <div className="mt-2 text-2xl font-black tracking-tight cartoon-text text-white">{a.title}</div>
+                            <div className="mt-1 text-sm font-bold text-white/90">{a.subtitle}</div>
                           </div>
                           <div className="text-3xl">{a.emoji}</div>
                         </div>
 
                         <div className="mt-6 flex items-center justify-between">
-                          <div className="text-xs text-white/60">{preview}</div>
+                          <div className="text-sm font-bold text-white">{preview}</div>
                           {locked ? (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs font-semibold text-white/70">
+                            <span
+                              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-black text-white cartoon-border"
+                              style={{ borderColor: '#666', backgroundColor: 'rgba(102, 102, 102, 0.2)' }}
+                            >
                               <Lock className="h-3.5 w-3.5" /> Locked
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                            <span
+                              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-black text-white cartoon-border"
+                              style={{ borderColor: '#1bb388', backgroundColor: '#1bb388' }}
+                            >
                               <BadgeCheck className="h-3.5 w-3.5" /> Unlocked
                             </span>
                           )}
                         </div>
 
-                        <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-                        <div className="mt-4 text-xs text-white/60">
+                        <div className="mt-4 h-1 w-full rounded-full" style={{ backgroundColor: unlocked ? 'rgba(27, 179, 136, 0.3)' : 'rgba(102, 102, 102, 0.2)' }} />
+                        <div className="mt-4 text-xs font-semibold text-white/80">
                           {locked ? (future ? 'Future Act. We’re cooking.' : 'Complete previous acts to unlock this chapter.') : 'Tap to enter. Swipe cards. Screenshot everything.'}
                         </div>
                       </div>
@@ -1451,7 +1476,7 @@ export default function StarknetWrapped() {
             </motion.div>
           ) : null}
 
-          {screen === 'viewer' && data && act && actMeta && currentCard ? (
+            {screen === 'viewer' && data && act && actMeta && currentCard ? (
             <motion.div
               key="viewer"
               initial={{ opacity: 0, y: 12 }}
@@ -1461,7 +1486,7 @@ export default function StarknetWrapped() {
               className="w-full"
             >
               <div className="mb-6 flex items-center justify-between gap-3">
-                <NeonButton onClick={goToDashboard} kind="ghost" ariaLabel="Back to dashboard">
+                <NeonButton brutal={brutal} onClick={goToDashboard} kind="ghost" ariaLabel="Back to dashboard">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </NeonButton>
 
@@ -1471,14 +1496,13 @@ export default function StarknetWrapped() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <NeonButton onClick={onShare} kind="ghost" ariaLabel="Share">
+                  <NeonButton brutal={brutal} onClick={onShare} kind="ghost" ariaLabel="Share">
                     <Share2 className="h-4 w-4" /> Share
                   </NeonButton>
                 </div>
               </div>
 
               <div className="relative mx-auto max-w-3xl">
-                <div className="absolute -inset-10 -z-10 blur-3xl opacity-70" />
 
                 <div className="relative">
                   <motion.div
@@ -1501,7 +1525,7 @@ export default function StarknetWrapped() {
                     aria-label="Wrapped card"
                   >
                     <div ref={cardRef} className="relative">
-                      <GlassCard gradient={currentCard.gradient} glow={currentCard.glow} className="min-h-[540px]">
+                      <GlassCard brutal={brutal} gradient={currentCard.gradient} glow={currentCard.glow} className="min-h-[540px]">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             {currentCard.kicker ? (
@@ -1526,7 +1550,7 @@ export default function StarknetWrapped() {
                               </span>
                             </button>
 
-                            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70">
+                            <div className="inline-flex items-center gap-2 rounded-2xl cartoon-border px-3 py-2 text-xs font-bold text-white" style={{ borderColor: '#1bb388', backgroundColor: 'rgba(27, 179, 136, 0.15)' }}>
                               {currentCard.icon ?? <Sparkles className="h-4 w-4" />}
                               <span className="hidden sm:inline">Swipe</span>
                             </div>
@@ -1538,10 +1562,10 @@ export default function StarknetWrapped() {
                         <div className="mt-10 flex items-center justify-between gap-3">
                           <div className="text-xs text-white/55">Double-tap to favorite • Arrow keys supported</div>
                           <div className="flex items-center gap-2">
-                            <NeonButton onClick={copyShare} kind="ghost" ariaLabel="Copy caption">
+                            <NeonButton brutal={brutal} onClick={copyShare} kind="ghost" ariaLabel="Copy caption">
                               <Copy className="h-4 w-4" /> Copy
                             </NeonButton>
-                            <NeonButton onClick={onShare} kind="primary" ariaLabel="Share card">
+                            <NeonButton brutal={brutal} onClick={onShare} kind="primary" ariaLabel="Share card">
                               <Share2 className="h-4 w-4" /> Share
                             </NeonButton>
                           </div>
@@ -1553,7 +1577,7 @@ export default function StarknetWrapped() {
                   </motion.div>
 
                   <div className="mt-6 flex items-center justify-between">
-                    <NeonButton onClick={prevCard} kind="ghost" disabled={cardIndex === 0} ariaLabel="Previous card">
+                    <NeonButton brutal={brutal} onClick={prevCard} kind="ghost" disabled={cardIndex === 0} ariaLabel="Previous card">
                       <ArrowLeft className="h-4 w-4" /> Prev
                     </NeonButton>
 
@@ -1571,7 +1595,7 @@ export default function StarknetWrapped() {
                       ))}
                     </div>
 
-                    <NeonButton onClick={nextCard} kind="ghost" disabled={cardIndex === cards.length - 1} ariaLabel="Next card">
+                    <NeonButton brutal={brutal} onClick={nextCard} kind="ghost" disabled={cardIndex === cards.length - 1} ariaLabel="Next card">
                       Next <ArrowRight className="h-4 w-4" />
                     </NeonButton>
                   </div>
@@ -1606,7 +1630,8 @@ export default function StarknetWrapped() {
               </div>
             </motion.div>
           ) : null}
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

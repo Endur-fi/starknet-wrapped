@@ -12,14 +12,16 @@ export default {
           pink: '#EC4899',
           cyan: '#06B6D4',
           green: '#10B981',
-          gold: '#F59E0B'
+          gold: '#F59E0B',
+          greenCyan: '#1bb388'
         }
       },
       boxShadow: {
         glow: '0 0 30px rgba(139, 92, 246, 0.35)',
         glowPink: '0 0 30px rgba(236, 72, 153, 0.35)',
         glowCyan: '0 0 30px rgba(6, 182, 212, 0.35)',
-        glowGreen: '0 0 30px rgba(16, 185, 129, 0.35)'
+        glowGreen: '0 0 30px rgba(16, 185, 129, 0.35)',
+        glowGreenCyan: '0 0 30px rgba(27, 179, 136, 0.35)'
       },
       keyframes: {
         floaty: {
